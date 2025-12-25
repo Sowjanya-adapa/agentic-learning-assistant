@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from database.db import (
     check_db_connection,
     bkt_states_collection,
-    bkt_attempts_collection,
+    analytics_collection,
     learning_history_collection,
 )
 from database.models import (
