@@ -9,9 +9,9 @@ from database.db import (
     learning_history_collection,
 )
 from database.models import (
-    bkt_state_document,
-    attempt_document,
-    learning_history_document,
+   learning_history_collection,
+    bkt_states_collection,
+    analytics_collection
 )
 
 # Agents
@@ -82,9 +82,9 @@ def root():
     return {"message": "Agentic Personalized Learning Assistant Backend is running"}
 
 
-@app.get("/health")
-def health_check():
-    db_status = check_db_connection()
+@app.get("/")
+def health():
+   
     return {
         "api": "OK",
         "database": "Connected" if db_status else "Not Connected",
