@@ -1,8 +1,16 @@
-from pymongo import MongoClient
-from config import MONGO_URI, DATABASE_NAME
+# database/db.py
+import os
 
-client = MongoClient(MONGO_URI)
-db = client[DATABASE_NAME]
+USE_DB = os.getenv("USE_DB", "false").lower() == "true"
+
+db = None
+
+if USE_DB:
+    from pymongo import MongoClient
+    MONGO_URI = os.getenv("MONGO_URI")
+    client = MongoClient(MONGO_URI)
+    db = client["agentic_learning"]
+
 
 # Collections
 students_collection = db["students"]
