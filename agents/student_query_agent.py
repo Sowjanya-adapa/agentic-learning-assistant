@@ -1,37 +1,46 @@
 import requests
+import os
 
 class StudentQueryAgent:
+    def __init__(self):
+        self.api_key = os.getenv("HF_API_KEY")
+        self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+        self.headers = {
+            "Authorization": f"Bearer {self.api_key}"
+        }
+
     def answer_question(self, student_id: str, question: str) -> dict:
-        try:
-            # Try Ollama (local only)
-            response = requests.post(
-                "http://localhost:11434/api/generate",
-                json={
-                    "model": "llama2",
-                    "prompt": question,
-                    "stream": False
-                },
-                timeout=3
-            )
+        if not self.api_key:
+            return {
+                "student_id": student_id,
+                "question": question,
+                "answer": "LLM API key not configured."
+            }
 
-            if response.status_code == 200:
-                data = response.json()
-                return {
-                    "student_id": student_id,
-                    "question": question,
-                    "answer": data.get("response", "No response generated")
-                }
+        payload = {
+            "inputs": f"Answer clearly with examples:\n{question}"
+        }
 
-        except Exception:
-            pass  # Ollama not available (cloud)
+        response = requests.post(
+            self.api_url,
+            headers=self.headers,
+            json=payload,
+            timeout=30
+        )
 
-        # ✅ Fallback response (cloud-safe)
+        if response.status_code != 200:
+            return {
+                "student_id": student_id,
+                "question": question,
+                "answer": "LLM service temporarily unavailable."
+            }
+
+        result = response.json()
+
+        generated_text = result[0]["generated_text"] if isinstance(result, list) else str(result)
+
         return {
             "student_id": student_id,
             "question": question,
-            "answer": (
-                "Hadoop is an open-source framework used in Big Data to store and "
-                "process very large datasets across distributed clusters of computers. "
-                "It consists mainly of HDFS (storage) and MapReduce (processing)."
-            )
+            "answer": generated_text
         }
