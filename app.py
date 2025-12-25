@@ -2,17 +2,20 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 # Database
+# Database collections
 from database.db import (
-    check_db_connection,
+    students_collection,
+    history_collection,
     bkt_states_collection,
-    analytics_collection,
     learning_history_collection,
+    analytics_collection,
 )
-from database.models import (
-   learning_history_collection,
-    bkt_states_collection,
-    analytics_collection
-)
+
+# Optional DB health check
+try:
+    from database.db import check_db_connection
+except ImportError:
+    check_db_connection = None
 
 # Agents
 from agents.student_query_agent import StudentQueryAgent
@@ -73,22 +76,15 @@ class QuizFeedbackRequest(BaseModel):
     mastery_before: float
     mastery_after: float
 
-
-# -------------------------------------------------
-# Core Endpoints
-# -------------------------------------------------
-@app.get("/")
-def root():
-    return {"message": "Agentic Personalized Learning Assistant Backend is running"}
-
-
-@app.get("/")
+@app.get("/health")
 def health():
-   
+    db_status = check_db_connection() if check_db_connection else False
     return {
         "api": "OK",
         "database": "Connected" if db_status else "Not Connected",
     }
+
+
 
 
 # -------------------------------------------------
@@ -342,6 +338,7 @@ def learning_summary(student_id: str, skill_id: str):
         trend = "improving"
     elif gain < -0.05:
         trend = "declining"
+
     else:
         trend = "stagnant"
 
