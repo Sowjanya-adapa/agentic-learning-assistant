@@ -1,10 +1,17 @@
 from pymongo import MongoClient
 import os
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_URI = os.getenv("MONGO_URI")
 
-client = MongoClient(MONGO_URI)
-db = client["agentic_learning"]
+client = None
+db = None
+
+try:
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    client.admin.command("ping")
+    db = client["agentic_learning"]
+except Exception as e:
+    print("MongoDB connection failed:", e)
 
 # Collections
 learning_history_collection = db["learning_history"]

@@ -22,6 +22,7 @@ from agents.student_query_agent import StudentQueryAgent
 from agents.bkt_agent import BKTEngine
 from agents.rl_quiz_agent import AdaptiveQuizAgent
 from agents.controller import MultiAgentController
+from database.db import check_db_connection
 
 
 # -------------------------------------------------
@@ -76,9 +77,9 @@ class QuizFeedbackRequest(BaseModel):
     mastery_before: float
     mastery_after: float
 
-@app.get("/health")
+@app.get("/")
 def health():
-    db_status = check_db_connection() if check_db_connection else False
+   
     return {
         "api": "OK",
         "database": "Connected" if db_status else "Not Connected",
